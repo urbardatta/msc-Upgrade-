@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Saver Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        :root {
+            --bg: #f0f2f8;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-glow: rgba(37,99,235,0.15);
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --radius: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 14px;
+            font-size: 13px;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -250px; right: -250px;
+            width: 700px; height: 700px;
+            background: radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 65%);
+            pointer-events: none; z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -250px; left: -250px;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(124,58,237,0.05) 0%, transparent 65%);
+            pointer-events: none; z-index: 0;
+        }
+
+        .container { max-width: 100%; margin: 0 auto; position: relative; z-index: 1; }
+
+        /* ======= LOGIN ======= */
+        .login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #1e3a8a 0%, #312e81 50%, #4c1d95 100%);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .login-screen::before {
+            content: '';
+            position: absolute;
+            width: 800px; height: 800px;
+            top: -300px; left: -300px;
+            background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 65%);
+            animation: floatOrb 8s ease-in-out infinite;
+        }
+        .login-screen::after {
+            content: '';
+            position: absolute;
+            width: 600px; height: 600px;
+            bottom: -200px; right: -200px;
+            background: radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 65%);
+            animation: floatOrb 6s ease-in-out infinite reverse;
+        }
+        @keyframes floatOrb {
+            0%,100% { transform: translate(0,0) scale(1); }
+            33% { transform: translate(30px,-30px) scale(1.06); }
+            66% { transform: translate(-20px,20px) scale(0.96); }
+        }
+
+        .login-box {
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(24px);
+            border-radius: 20px;
+            padding: 44px 40px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.12);
+            position: relative; z-index: 1;
+            animation: loginAppear 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes loginAppear {
+            from { opacity: 0; transform: translateY(40px) scale(0.93); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .login-logo {
+            font-size: 58px;
+            margin-bottom: 18px;
+            display: block;
+            animation: logoBounce 2.5s ease-in-out infinite;
+        }
+        @keyframes logoBounce {
+            0%,100% { transform: translateY(0) rotate(0deg); }
+            40% { transform: translateY(-8px) rotate(-3deg); }
+            60% { transform: translateY(-8px) rotate(3deg); }
+        }
+
+        .login-title {
+            font-size: 26px; font-weight: 700;
+            color: #0f172a; margin-bottom: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .login-subtitle { color: #64748b; margin-bottom: 28px; font-size: 14px; }
+
+        .auth-form { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .auth-form input {
+            width: 100%; padding: 13px 16px; font-size: 14px;
+            border: 2px solid #e2e8f0; border-radius: 10px;
+            background: #f8fafc; transition: all 0.25s;
+            font-family: 'DM Sans', sans-serif; color: #0f172a;
+        }
+        .auth-form input:focus {
+            outline: none; border-color: var(--primary);
+            background: white; box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
+            transform: translateY(-1px);
+        }
+
+        .auth-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            color: white; padding: 14px; font-size: 15px; font-weight: 600;
+            border-radius: 10px; margin-top: 8px; border: none; cursor: pointer;
+            transition: all 0.25s; font-family: 'DM Sans', sans-serif;
+            position: relative; overflow: hidden;
+        }
+        .auth-btn::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+            opacity: 0; transition: opacity 0.25s;
+        }
+        .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(37,99,235,0.45); }
+        .auth-btn:hover::before { opacity: 1; }
+        .auth-btn:active { transform: translateY(0); }
+
+        .auth-toggle { margin-top: 20px; font-size: 13px; color: #64748b; }
+        .auth-toggle span { color: var(--primary); cursor: pointer; font-weight: 600; }
+        .auth-toggle span:hover { text-decoration: underline; }
+
+        .hidden { display: none !important; }
+
+        /* ======= HEADER ======= */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 14px; padding: 10px 16px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            animation: slideDown 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-left { display: flex; align-items: center; gap: 12px; }
+
+        h1 {
+            font-size: 18px; font-weight: 700; color: var(--primary);
+            font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.3px;
+        }
+
+        .sync-status {
+            font-size: 11px; color: var(--success);
+            display: flex; align-items: center; gap: 5px;
+            font-weight: 600; padding: 4px 10px;
+            background: rgba(16,185,129,0.08);
+            border-radius: 20px;
+            border: 1px solid rgba(16,185,129,0.2);
+            transition: all 0.3s;
+        }
+        .sync-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: currentColor;
+            animation: syncPulse 2s ease-in-out infinite;
+        }
+        @keyframes syncPulse {
+            0%,100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.7); }
+        }
+
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            border: 2px solid var(--primary);
+            transition: all 0.2s; cursor: pointer;
+        }
+        .user-avatar:hover { transform: scale(1.1) rotate(5deg); box-shadow: 0 4px 12px var(--primary-glow); }
+        .user-name { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .count { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+        .logout-btn {
+            padding: 6px 12px; background: transparent;
+            color: var(--danger); border: 1.5px solid var(--danger);
+            border-radius: 8px; font-size: 11px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+        }
+        .logout-btn:hover { background: var(--danger); color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+
+        /* ======= INPUT SECTION ======= */
+        .input-section {
+            background: var(--surface);
+            border-radius: var(--radius); padding: 12px 14px;
+            margin-bottom: 14px;
+            display: grid; grid-template-columns: 1.5fr 190px 2fr auto auto;
+            gap: 8px; align-items: center;
+            border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+            animation: slideDown 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.07s both;
+        }
+
+        input, select, .editor {
+            padding: 9px 12px; background: #f8fafc;
+            border: 1.5px solid #e2e8f0; border-radius: 8px;
+            color: var(--text); font-family: 'DM Sans', sans-serif;
+            font-size: 12px; transition: all 0.2s;
+        }
+        input:focus, select:focus, .editor:focus {
+            outline: none; border-color: var(--primary);
+            background: white; box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+        .editor {
+            min-height: 38px; max-height: 38px;
+            overflow-y: auto; overflow-x: hidden;
+            word-wrap: break-word; white-space: pre-wrap;
+        }
+        .editor:empty:before { content: 'Message...'; color: #94a3b8; }
+        .editor a { color: var(--primary); text-decoration: underline; }
+
+        button {
+            padding: 9px 16px; border: none; border-radius: 8px;
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; white-space: nowrap;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.28);
+        }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(37,99,235,0.4); }
+        .btn-save:active { transform: translateY(0); }
+
+        .btn-export {
+            background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+            color: white; box-shadow: 0 2px 8px rgba(124,58,237,0.28);
+        }
+        .btn-export:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(124,58,237,0.4); }
+
+        .btn-layout {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white; box-shadow: 0 2px 8px rgba(245,158,11,0.28);
+        }
+        .btn-layout.active {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            animation: layoutPulse 1.6s ease-in-out infinite;
+        }
+        @keyframes layoutPulse {
+            0%,100% { box-shadow: 0 2px 8px rgba(245,158,11,0.3); }
+            50% { box-shadow: 0 4px 22px rgba(245,158,11,0.65); }
+        }
+        .btn-layout:hover { transform: translateY(-2px); }
+
+        /* ======= CONTROLS ======= */
+        .controls {
+            display: flex; gap: 8px; margin-bottom: 14px; align-items: center;
+            animation: slideDown 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.14s both;
+        }
+        .search-box { flex: 1; position: relative; }
+        .search-box input { width: 100%; padding-left: 34px; }
+        .search-icon {
+            position: absolute; left: 10px; top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8; font-size: 14px; pointer-events: none;
+        }
+        .filter-category { width: 165px; }
+
+        /* ======= GRIDS ======= */
+        .messages-grid {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            max-height: calc(100vh - 190px);
+            overflow-y: auto; padding: 2px 2px 10px 2px;
+            align-content: flex-start;
+        }
+        .time-preset-wrapper {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            animation: slideDown 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.21s both;
+        }
+
+        /* ======= MESSAGE CARD ======= */
+        .message-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 13px; cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+            position: relative; display: flex; flex-direction: column;
+            width: 280px; height: 180px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            animation: cardAppear 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(18px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Top accent line */
+        .message-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #2563eb, #8b5cf6, #10b981);
+            opacity: 0; transition: opacity 0.25s;
+            border-radius: 12px 12px 0 0;
+        }
+        .message-card:hover::before { opacity: 1; }
+        .message-card:hover {
+            border-color: #93c5fd;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px var(--primary-glow), var(--shadow-md);
+        }
+        .message-card.copied {
+            background: #f0fdf4; border-color: var(--success);
+            box-shadow: 0 6px 24px rgba(16,185,129,0.2);
+        }
+
+        /* Ripple */
+        .ripple {
+            position: absolute; border-radius: 50%;
+            background: rgba(37,99,235,0.12);
+            transform: scale(0); pointer-events: none;
+            animation: rippleAnim 0.55s linear;
+        }
+        @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+        /* Sortable */
+        .sortable-ghost { opacity: 0.3; transform: scale(0.95); border: 2px dashed #93c5fd !important; background: #eff6ff !important; }
+        .sortable-drag {
+            cursor: grabbing !important;
+            transform: rotate(2.5deg) scale(1.05) !important;
+            box-shadow: 0 24px 50px rgba(37,99,235,0.28) !important;
+            z-index: 999;
+        }
+        .layout-active .message-card {
+            cursor: grab;
+            animation: jitter 0.3s ease-in-out infinite alternate;
+        }
+        @keyframes jitter {
+            from { transform: rotate(-0.6deg); }
+            to { transform: rotate(0.6deg); }
+        }
+
+        /* ======= TIME PRESET CARD ======= */
+        .time-preset-card {
+            background: linear-gradient(140deg, #080e1f 0%, #0c1d3a 45%, #0f2847 100%);
+            border: 1.5px solid rgba(59,130,246,0.4);
+            border-radius: var(--radius);
+            padding: 13px; cursor: pointer; transition: all 0.3s;
+            position: relative; display: flex; flex-direction: column;
+            width: 280px; height: 180px;
+            box-shadow: 0 4px 24px rgba(37,99,235,0.18), inset 0 1px 0 rgba(255,255,255,0.05);
+            overflow: hidden; flex-shrink: 0;
+        }
+
+        /* Shimmer sweep */
+        .time-preset-card::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(105deg, transparent 35%, rgba(96,165,250,0.07) 50%, transparent 65%);
+            background-size: 250% 100%;
+            animation: sweepShimmer 3.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes sweepShimmer {
+            0% { background-position: 250% 0; }
+            100% { background-position: -250% 0; }
+        }
+
+        /* Top right orb */
+        .time-orb-tr {
+            position: absolute; top: -50px; right: -50px;
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, rgba(59,130,246,0.22) 0%, transparent 65%);
+            pointer-events: none;
+            animation: orbPulse 4s ease-in-out infinite;
+        }
+        @keyframes orbPulse {
+            0%,100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+        }
+
+        /* Bottom left orb */
+        .time-orb-bl {
+            position: absolute; bottom: -45px; left: -45px;
+            width: 130px; height: 130px;
+            background: radial-gradient(circle, rgba(16,185,129,0.16) 0%, transparent 65%);
+            pointer-events: none;
+            animation: orbPulse 5s ease-in-out infinite reverse;
+        }
+
+        .time-preset-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 36px rgba(37,99,235,0.32), inset 0 1px 0 rgba(255,255,255,0.08);
+            border-color: rgba(96,165,250,0.65);
+        }
+        .time-preset-card.copied {
+            background: linear-gradient(140deg, #021a0f 0%, #044226 50%, #021a0f 100%);
+            border-color: rgba(16,185,129,0.55);
+            box-shadow: 0 12px 36px rgba(16,185,129,0.28);
+        }
+
+        .time-card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 4px; position: relative; z-index: 1;
+        }
+        .time-card-label {
+            font-size: 10px; font-weight: 700; color: #60a5fa;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .time-card-badge {
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 10px; font-weight: 700;
+            background: rgba(37,99,235,0.22);
+            color: #93c5fd;
+            border: 1px solid rgba(59,130,246,0.3);
+        }
+
+        .time-display-main {
+            font-size: 46px; font-weight: 700; color: #fff;
+            line-height: 1; letter-spacing: -2px;
+            margin: 7px 0 3px 0;
+            font-family: 'Space Grotesk', sans-serif;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 30px rgba(96,165,250,0.65), 0 0 60px rgba(96,165,250,0.2);
+            position: relative; z-index: 1;
+            transition: text-shadow 0.3s;
+        }
+        .time-preset-card:hover .time-display-main {
+            text-shadow: 0 0 40px rgba(96,165,250,0.95), 0 0 80px rgba(96,165,250,0.35);
+        }
+
+        .time-display-sub {
+            font-size: 10.5px; color: #4b6080;
+            letter-spacing: 0.03em; position: relative; z-index: 1;
+        }
+        .time-display-sub .highlight {
+            color: #10b981; font-weight: 700;
+            background: rgba(16,185,129,0.14);
+            padding: 1px 7px; border-radius: 5px;
+        }
+
+        .time-card-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin-top: auto; position: relative; z-index: 1;
+        }
+        .time-copy-hint {
+            font-size: 10.5px; color: #3d5070;
+            display: flex; align-items: center; gap: 4px;
+            transition: color 0.25s;
+        }
+        .time-preset-card:hover .time-copy-hint { color: #60a5fa; }
+
+        .time-live-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px rgba(16,185,129,0.7);
+            display: inline-block;
+            animation: liveDotPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes liveDotPulse {
+            0%,100% { opacity: 1; box-shadow: 0 0 8px rgba(16,185,129,0.7); }
+            50% { opacity: 0.55; box-shadow: 0 0 4px rgba(16,185,129,0.4); }
+        }
+
+        .time-card-date { font-size: 10.5px; color: #2d3f55; font-weight: 500; }
+
+        /* ======= CARD INTERNALS ======= */
+        .message-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+        .message-title {
+            font-weight: 700; font-size: 14px; color: var(--text);
+            flex: 1; overflow: hidden; text-overflow: ellipsis;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            line-height: 1.4; font-family: 'Space Grotesk', sans-serif;
+        }
+        .category-badge {
+            padding: 3px 9px; border-radius: 20px;
+            font-size: 10px; font-weight: 700;
+            white-space: nowrap; flex-shrink: 0; letter-spacing: 0.02em;
+        }
+        .category-work { background: #dbeafe; color: #1d4ed8; }
+        .category-personal { background: #fce7f3; color: #be185d; }
+        .category-templates { background: #fef3c7; color: #b45309; }
+        .category-important { background: #fee2e2; color: #dc2626; }
+        .category-other { background: #f1f5f9; color: #475569; }
+
+        .message-content {
+            color: #475569; font-size: 12px; line-height: 1.55;
+            margin-bottom: 8px; flex: 1; overflow: hidden;
+            display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;
+            word-wrap: break-word;
+        }
+        .message-content a { color: var(--primary); text-decoration: underline; font-weight: 500; }
+        .message-content strong { color: var(--text); font-weight: 600; }
+        .message-content em { color: #7c3aed; font-style: italic; }
+
+        .message-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 8px; border-top: 1px solid #f1f5f9; margin-top: auto;
+        }
+        .copy-hint { font-size: 10.5px; color: #94a3b8; transition: color 0.2s; }
+        .message-card:hover .copy-hint { color: var(--primary); }
+
+        .delete-btn {
+            padding: 4px 10px; background: transparent;
+            color: var(--danger); border: 1.5px solid #fecaca;
+            border-radius: 6px; font-size: 10.5px; font-weight: 600;
+            transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+        }
+        .delete-btn:hover {
+            background: var(--danger); color: white; border-color: var(--danger);
+            box-shadow: 0 3px 10px rgba(239,68,68,0.3); transform: translateY(-1px);
+        }
+
+        /* ======= EMPTY STATE ======= */
+        .empty-state {
+            text-align: center; padding: 50px 40px;
+            color: #94a3b8; width: 100%;
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.45; display: block; }
+        .empty-text { font-size: 14px; font-weight: 500; }
+
+        /* ======= TOAST ======= */
+        .toast {
+            position: fixed; bottom: 24px; right: 24px;
+            padding: 12px 18px; background: white;
+            border-left: 4px solid var(--success);
+            border-radius: 10px; color: var(--text);
+            font-weight: 600; font-size: 13px;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.06);
+            animation: toastIn 0.38s cubic-bezier(0.34,1.56,0.64,1), toastOut 0.3s ease 2.7s forwards;
+            z-index: 9999;
+        }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.warning { border-left-color: var(--warning); }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(80px) scale(0.9); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(80px); }
+        }
+
+        /* ======= LOADING ======= */
+        .loading {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 50px; color: #94a3b8; width: 100%; gap: 14px;
+            animation: fadeIn 0.3s ease;
+        }
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 36px; height: 36px;
+            animation: spin 0.75s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 13px; font-weight: 500; color: #94a3b8; }
+
+        /* ======= SCROLLBAR ======= */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+        /* ======= RESPONSIVE ======= */
+        @media (max-width: 768px) {
+            .message-card, .time-preset-card { width: calc(50% - 5px); }
+            .input-section { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-box">
+            <span class="login-logo">💾</span>
+            <h2 id="authTitle" class="login-title">Welcome Back</h2>
+            <p id="authSubtitle" class="login-subtitle">Sign in to sync your messages</p>
+            <div class="auth-form">
+                <input type="email" id="email" placeholder="Email Address">
+                <input type="password" id="password" placeholder="Password">
+                <button id="authBtn" class="auth-btn" onclick="handleAuth()">Login</button>
+            </div>
+            <div class="auth-toggle">
+                <span id="toggleText">New here? </span>
+                <span id="toggleLink" onclick="toggleAuthMode()">Create account</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="container hidden">
+        <div class="header">
+            <div class="header-left">
+                <h1>💾 Message Saver Pro</h1>
+                <div class="sync-status">
+                    <span class="sync-dot"></span>
+                    <span id="syncStatus">Synced</span>
+                </div>
+            </div>
+            <div class="user-info">
+                <div class="count"><span id="messageCount">0</span> / 40</div>
+                <img id="userAvatar" class="user-avatar" src="" alt="User">
+                <span id="userName" class="user-name"></span>
+                <button class="logout-btn" onclick="signOut()">Logout</button>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <input type="text" id="title" placeholder="Title">
+            <select id="category">
+                <option value="work">💼 Work</option>
+                <option value="personal">💭 Personal</option>
+                <option value="templates">📝 Templates</option>
+                <option value="important">⚡ Important</option>
+                <option value="other">📌 Other</option>
+            </select>
+            <div id="editor" class="editor" contenteditable="true"></div>
+            <button id="saveBtn" class="btn-save" onclick="saveMessage()">💾 Save</button>
+            <button class="btn-export" onclick="exportMessages()">📤 Export</button>
+        </div>
+
+        <div class="controls">
+            <button id="layoutBtn" class="btn-layout" onclick="toggleLayoutMode()">🔧 Edit Layout</button>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchBox" placeholder="Search messages..." oninput="filterMessages()">
+            </div>
+            <div class="filter-category">
+                <select id="filterCategory" onchange="filterMessages()">
+                    <option value="all">All Categories</option>
+                    <option value="work">💼 Work</option>
+                    <option value="personal">💭 Personal</option>
+                    <option value="templates">📝 Templates</option>
+                    <option value="important">⚡ Important</option>
+                    <option value="other">📌 Other</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Time Card — Fixed, never draggable -->
+        <div class="time-preset-wrapper">
+            <div class="time-preset-card" id="timePresetCard" onclick="copyTimeCard(event)">
+                <div class="time-orb-tr"></div>
+                <div class="time-orb-bl"></div>
+                <div class="time-card-header">
+                    <div class="time-card-label">
+                        <span class="time-live-dot"></span>
+                        BD Time + 6 min
+                    </div>
+                    <span class="time-card-badge">🕐 PRESET</span>
+                </div>
+                <div class="time-display-main" id="timeDisplayMain">--:-- --</div>
+                <div class="time-display-sub">
+                    Bangladesh Standard Time &nbsp;<span class="highlight">+6 min</span>
+                </div>
+                <div class="time-card-footer">
+                    <div class="time-copy-hint">📋 Click to copy time</div>
+                    <div class="time-card-date" id="timeDisplayDate">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sortable messages only -->
+        <div id="messagesList" class="messages-grid" style="margin-top:10px;">
+            <div class="loading">
+                <div class="spinner"></div>
+                <span class="loading-text">Loading messages...</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut as firebaseSignOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, deleteDoc, doc, query, onSnapshot, serverTimestamp, writeBatch } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLTpu6dSAS-g__Y86Xe9l-MWRn_vggIvg",
+            authDomain: "massage-server-66b03.firebaseapp.com",
+            projectId: "massage-server-66b03",
+            storageBucket: "massage-server-66b03.firebasestorage.app",
+            messagingSenderId: "683120888575",
+            appId: "1:683120888575:web:4e2d3267fac1fad4c15aca",
+            measurementId: "G-7R9FQ15QTG"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null, messagesCache = [], unsubscribe = null;
+        const MAX_MESSAGES = 40;
+        let isLoginMode = true, sortable = null, isLayoutMode = false, timeInterval = null;
+
+        // ===== BD TIME =====
+        function getBDTimePlus6() {
+            const now = new Date();
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const bd = new Date(utc + 6 * 3600000);
+            bd.setMinutes(bd.getMinutes() + 6);
+            return bd;
+        }
+        function formatTime(d) {
+            let h = d.getHours();
+            const m = d.getMinutes(), ap = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ap}`;
+        }
+        function formatDate(d) {
+            const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+            const mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return `${days[d.getDay()]}, ${d.getDate()} ${mons[d.getMonth()]} ${d.getFullYear()}`;
+        }
+        function startTimeClock() {
+            updateTimeClock();
+            if (timeInterval) clearInterval(timeInterval);
+            timeInterval = setInterval(updateTimeClock, 1000);
+        }
+        function updateTimeClock() {
+            const t = getBDTimePlus6();
+            const el = document.getElementById('timeDisplayMain');
+            const de = document.getElementById('timeDisplayDate');
+            if (el) el.textContent = formatTime(t);
+            if (de) de.textContent = formatDate(t);
+        }
+
+        window.copyTimeCard = function() {
+            const text = formatTime(getBDTimePlus6());
+            const doCopy = (t) => {
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(t).then(() => { flash(); showToast(`⏰ Copied: ${t}`); }).catch(() => fallback(t));
+                } else { fallback(t); }
+            };
+            const fallback = (t) => {
+                const ta = document.createElement('textarea');
+                ta.value = t; ta.style.cssText = 'position:fixed;left:-9999px;opacity:0';
+                document.body.appendChild(ta); ta.focus(); ta.select();
+                try { document.execCommand('copy'); flash(); showToast(`⏰ Copied: ${t}`); }
+                catch(e) { showToast('❌ Copy failed', 'error'); }
+                document.body.removeChild(ta);
+            };
+            const flash = () => {
+                const card = document.getElementById('timePresetCard');
+                if (!card) return;
+                card.classList.add('copied');
+                setTimeout(() => card.classList.remove('copied'), 700);
+            };
+            doCopy(text);
+        };
+
+        // ===== AUTH =====
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                document.getElementById('userName').textContent = user.email.split('@')[0];
+                document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=2563eb&color=fff&bold=true`;
+                loadMessagesFromFirestore();
+                startTimeClock();
+            } else {
+                currentUser = null;
+                if (unsubscribe) unsubscribe();
+                if (timeInterval) clearInterval(timeInterval);
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.getElementById('mainApp').classList.add('hidden');
+            }
+        });
+
+        window.handleAuth = async function() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            if (!email || !password) { showToast('⚠️ Please enter email and password', 'warning'); return; }
+            const btn = document.getElementById('authBtn');
+            const orig = btn.textContent;
+            btn.textContent = '⏳ Please wait...'; btn.disabled = true;
+            try {
+                if (isLoginMode) { await signInWithEmailAndPassword(auth, email, password); showToast('🔋 Logged in!'); }
+                else { await createUserWithEmailAndPassword(auth, email, password); showToast('✨ Account created!'); }
+            } catch(e) {
+                showToast(`❌ ${e.message}`, 'error');
+                btn.textContent = orig; btn.disabled = false;
+            }
+        };
+
+        window.toggleAuthMode = function() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('authTitle').textContent = isLoginMode ? 'Welcome Back' : 'Create Account';
+            document.getElementById('authSubtitle').textContent = isLoginMode ? 'Sign in to sync your messages' : 'Join us to save your messages';
+            document.getElementById('authBtn').textContent = isLoginMode ? 'Login' : 'Register';
+            document.getElementById('toggleText').textContent = isLoginMode ? 'New here? ' : 'Already have an account? ';
+            document.getElementById('toggleLink').textContent = isLoginMode ? 'Create account' : 'Login';
+        };
+
+        window.signOut = async function() {
+            try { await firebaseSignOut(auth); showToast('👋 Signed out'); } catch(e) {}
+        };
+
+        function loadMessagesFromFirestore() {
+            if (!currentUser) return;
+            unsubscribe = onSnapshot(query(collection(db, 'users', currentUser.uid, 'messages')), (snap) => {
+                messagesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                messagesCache.sort((a, b) => {
+                    const oa = a.order ?? Number.MAX_SAFE_INTEGER;
+                    const ob = b.order ?? Number.MAX_SAFE_INTEGER;
+                    if (oa !== ob) return oa - ob;
+                    return (b.timestamp?.toMillis?.() || 0) - (a.timestamp?.toMillis?.() || 0);
+                });
+                displayMessages();
+                updateSyncStatus('Synced');
+            }, () => updateSyncStatus('Error'));
+        }
+
+        window.saveMessage = async function() {
+            if (!currentUser) return;
+            const title = document.getElementById('title').value.trim();
+            const editorEl = document.getElementById('editor');
+            let content = editorEl.innerHTML.trim();
+
+            content = content.replace(/(?<!href="|>)(https?:\/\/[^\s<"]+)(?![^<]*<\/a>)/g,
+                '<a href="$1" target="_blank" style="color:#2563eb;">$1</a>');
+            content = content.replace(/<span[^>]*style="[^"]*color:\s*rgb\(([^)]+)\)[^"]*"[^>]*>([^<]+)<\/span>/gi,
+                (_, rgb, t) => `<span style="color:rgb(${rgb});">${t}</span>`);
+            content = content.replace(/<span[^>]*style="[^"]*color:\s*(#[0-9a-f]{6})[^"]*"[^>]*>([^<]+)<\/span>/gi,
+                (_, c, t) => `<span style="color:${c};">${t}</span>`);
+
+            if (!content || content === '<br>') { showToast('⚠️ Please enter message!', 'warning'); return; }
+            if (messagesCache.length >= MAX_MESSAGES) { showToast(`❌ Maximum ${MAX_MESSAGES} messages!`, 'error'); return; }
+
+            const btn = document.getElementById('saveBtn');
+            btn.textContent = '⏳'; btn.disabled = true;
+            try {
+                updateSyncStatus('Saving...');
+                await addDoc(collection(db, 'users', currentUser.uid, 'messages'), {
+                    title: title || 'Untitled', content,
+                    category: document.getElementById('category').value,
+                    timestamp: serverTimestamp(), order: messagesCache.length
+                });
+                showToast('✅ Saved!');
+                document.getElementById('title').value = '';
+                editorEl.innerHTML = '';
+                updateSyncStatus('Synced');
+            } catch(e) { showToast('❌ Failed!', 'error'); updateSyncStatus('Error'); }
+            finally { btn.textContent = '💾 Save'; btn.disabled = false; }
+        };
+
+        window.toggleLayoutMode = function() {
+            isLayoutMode = !isLayoutMode;
+            const btn = document.getElementById('layoutBtn');
+            const grid = document.getElementById('messagesList');
+            if (isLayoutMode) {
+                btn.textContent = '✅ Save Layout'; btn.classList.add('active');
+                grid.classList.add('layout-active'); initSortable();
+            } else {
+                btn.textContent = '🔧 Edit Layout'; btn.classList.remove('active');
+                grid.classList.remove('layout-active'); saveNewOrder();
+                if (sortable) sortable.destroy();
+            }
+        };
+
+        function initSortable() {
+            if (sortable) sortable.destroy();
+            sortable = Sortable.create(document.getElementById('messagesList'), {
+                animation: 200,
+                easing: 'cubic-bezier(0.34,1.56,0.64,1)',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: () => updateSyncStatus('Unsaved changes...')
+            });
+        }
+
+        async function saveNewOrder() {
+            if (!currentUser) return;
+            const cards = document.getElementById('messagesList').querySelectorAll('.message-card[data-id]');
+            const batch = writeBatch(db);
+            cards.forEach((card, i) => batch.update(doc(db, 'users', currentUser.uid, 'messages', card.getAttribute('data-id')), { order: i }));
+            try {
+                updateSyncStatus('Saving layout...');
+                await batch.commit();
+                showToast('📋 Layout saved!');
+                updateSyncStatus('Synced');
+            } catch { showToast('❌ Layout save failed', 'error'); }
+        }
+
+        window.deleteMessage = async function(id, e) {
+            e.stopPropagation();
+            if (!currentUser || !confirm('Delete this message?')) return;
+            try {
+                updateSyncStatus('Deleting...');
+                await deleteDoc(doc(db, 'users', currentUser.uid, 'messages', id));
+                showToast('🗑️ Deleted'); updateSyncStatus('Synced');
+            } catch { showToast('❌ Delete failed!', 'error'); updateSyncStatus('Error'); }
+        };
+
+        window.copyMessage = function(id, e) {
+            if (e.target.closest('.delete-btn')) return;
+            const msg = messagesCache.find(m => m.id === id);
+            if (!msg) return;
+
+            // Ripple
+            const card = e.currentTarget;
+            const rect = card.getBoundingClientRect();
+            const rip = document.createElement('span');
+            const sz = Math.max(rect.width, rect.height);
+            rip.className = 'ripple';
+            rip.style.cssText = `width:${sz}px;height:${sz}px;left:${e.clientX-rect.left-sz/2}px;top:${e.clientY-rect.top-sz/2}px`;
+            card.appendChild(rip);
+            setTimeout(() => rip.remove(), 600);
+
+            const tmp = document.createElement('div');
+            tmp.contentEditable = true; tmp.innerHTML = msg.content;
+            tmp.style.cssText = 'position:absolute;left:-9999px;opacity:0';
+            document.body.appendChild(tmp);
+            const range = document.createRange();
+            range.selectNodeContents(tmp);
+            const sel = window.getSelection();
+            sel.removeAllRanges(); sel.addRange(range);
+            let ok = false;
+            try { ok = document.execCommand('copy'); } catch(err) {}
+            sel.removeAllRanges(); document.body.removeChild(tmp);
+
+            card.classList.add('copied');
+            setTimeout(() => card.classList.remove('copied'), 600);
+            showToast(ok ? '📋 Copied with formatting!' : '❌ Copy failed', ok ? '' : 'error');
+        };
+
+        function displayMessages(filtered = null) {
+            const msgs = filtered || messagesCache;
+            const container = document.getElementById('messagesList');
+            document.getElementById('messageCount').textContent = msgs.length;
+
+            if (msgs.length === 0) {
+                container.innerHTML = `<div class="empty-state"><span class="empty-icon">📭</span><div class="empty-text">No messages yet — save your first one above!</div></div>`;
+                return;
+            }
+
+            container.innerHTML = msgs.map((msg, i) => `
+                <div class="message-card" data-id="${msg.id}" onclick="copyMessage('${msg.id}', event)" style="animation-delay:${Math.min(i * 0.045, 0.5)}s">
+                    <div class="message-header">
+                        <div class="message-title">${escapeHtml(msg.title)}</div>
+                        <span class="category-badge category-${msg.category}">${getCategoryIcon(msg.category)}</span>
+                    </div>
+                    <div class="message-content">${msg.content}</div>
+                    <div class="message-footer">
+                        <div class="copy-hint">📋 Click to copy</div>
+                        <button class="delete-btn" onclick="deleteMessage('${msg.id}', event)">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.filterMessages = function() {
+            const s = document.getElementById('searchBox').value.toLowerCase();
+            const c = document.getElementById('filterCategory').value;
+            displayMessages(messagesCache.filter(m =>
+                (m.title.toLowerCase().includes(s) || m.content.toLowerCase().includes(s)) &&
+                (c === 'all' || m.category === c)
+            ));
+        };
+
+        window.exportMessages = function() {
+            if (!messagesCache.length) { showToast('⚠️ No messages!', 'warning'); return; }
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(messagesCache, null, 2)], {type:'application/json'}));
+            a.download = `messages-${new Date().toISOString().split('T')[0]}.json`;
+            a.click(); showToast('📤 Exported!');
+        };
+
+        function getCategoryIcon(c) {
+            return {work:'💼',personal:'💭',templates:'📝',important:'⚡',other:'📌'}[c] || '📌';
+        }
+        function escapeHtml(t) {
+            const d = document.createElement('div'); d.textContent = t; return d.innerHTML;
+        }
+        function showToast(msg, type = '') {
+            document.querySelectorAll('.toast').forEach(t => t.remove());
+            const toast = document.createElement('div');
+            toast.className = `toast${type ? ' ' + type : ''}`;
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3200);
+        }
+        function updateSyncStatus(status) {
+            const el = document.getElementById('syncStatus');
+            const wrap = el.parentElement;
+            el.textContent = status;
+            const styles = {
+                'Synced': ['#10b981','rgba(16,185,129,0.08)','rgba(16,185,129,0.2)'],
+                'Error':  ['#ef4444','rgba(239,68,68,0.08)','rgba(239,68,68,0.2)'],
+            };
+            const [color, bg, border] = styles[status] || ['#f59e0b','rgba(245,158,11,0.08)','rgba(245,158,11,0.2)'];
+            wrap.style.color = color;
+            wrap.style.background = bg;
+            wrap.style.borderColor = border;
+        }
+    </script>
+</body>
+</html>
